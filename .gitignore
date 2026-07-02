@@ -1,0 +1,56 @@
+# --------------- Python ---------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# --------------- Virtual environments ---------------
+.venv/
+venv/
+env/
+ENV/
+
+# --------------- Package managers (uv / pip / conda) ---------------
+uv.lock
+.uv/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# --------------- JetBrains IDE (.idea/) ---------------
+.idea/
+
+# --------------- VS Code ---------------
+.vscode/
+
+# --------------- macOS / Windows junk ---------------
+.DS_Store
+Thumbs.db
+
+# --------------- Streamlit ---------------
+# Local secrets file — never commit credentials. .streamlit/config.toml
+# (theme/server settings) is fine to keep tracked; secrets.toml is not.
+.streamlit/secrets.toml
+
+# --------------- Snowflake CLI ---------------
+.snowflake/
+
+# --------------- Environment variables / local overrides ---------------
+.env
+.env.*
+!.env.example
+
+# --------------- Jupyter ---------------
+.ipynb_checkpoints/
+
+# --------------- Testing / coverage ---------------
+.pytest_cache/
+.coverage
+htmlcov/
+
+# --------------- Logs ---------------
+*.log
