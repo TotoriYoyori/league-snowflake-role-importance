@@ -1,0 +1,21 @@
+[project]
+name = "role-importance"
+version = "0.1.0"
+description = "Logistic regression model tracking per-lane gold-diff win coefficients across League of Legends patches (lane quest system impact)."
+requires-python = "~=3.11.0"
+dependencies = [
+    "streamlit[snowflake]",
+    "pydantic>=2.0",
+    "pandas",
+    "numpy",
+    "scikit-learn",
+    "statsmodels",
+    "plotly",
+]
+
+[tool.uv]
+constraint-dependencies = ["numba>=0.56.0"]
+exclude-newer = "7 days"
+
+[tool.uv.exclude-newer-package]
+streamlit = false
