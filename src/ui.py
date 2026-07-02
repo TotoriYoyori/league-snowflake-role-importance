@@ -75,11 +75,14 @@ def render_card(
         body()
 
 
-def _df_body(df: pd.DataFrame, height: int | None = None, hide_index: bool = True) -> Callable[[], None]:
+def _df_body(
+    df: pd.DataFrame,
+    hide_index: bool = True
+) -> Callable[[], None]:
     return lambda: st.dataframe(
         df,
         width='stretch',
-        height=height or "content",
+        height='stretch',
         hide_index=hide_index
     )
 
@@ -104,13 +107,17 @@ def render_context_caption(df: pd.DataFrame) -> None:
     if df.empty:
         return
     date_min, date_max = df["GAME_DATE"].min(), df["GAME_DATE"].max()
+    date_min_str = pd.to_datetime(date_min).strftime("%Y-%m-%d")
+    date_max_str = pd.to_datetime(date_max).strftime("%Y-%m-%d")
+
     rank_counts = df["AVERAGE_RANK"].value_counts()
     top_rank = rank_counts.index[0] if not rank_counts.empty else "n/a"
     st.caption(
-        f"Data spans {date_min} to {date_max} · "
-        f"{len(df)} matches · most common rank tier: {top_rank}"
+        f"Data spans {date_min_str} to {date_max_str} · 数据时间范围 {date_min_str} 至 {date_max_str}"
     )
-
+    st.caption(
+        f"{len(df)} matches · most common rank tier: {top_rank} · 共 {len(df)} 场比赛，最常见段位：{top_rank}"
+    )
 
 # ===========================================================================
 # TAB 1: EDA
@@ -123,7 +130,10 @@ def render_eda_tab(settings: Settings, minute: int, team: str) -> None:
 
     render_context_caption(scaled_df)
     if n_dropped:
-        st.caption(f"{n_dropped} matches excluded for incomplete lane data at minute {minute}.")
+        st.caption(
+            f"{n_dropped} matches excluded for incomplete lane data at minute {minute}. · "
+            f"因分路数据不完整，已剔除 {n_dropped} 场比赛（第 {minute} 分钟）。"
+        )
 
     # ----- Class Balance: bar chart instead of table -----
     balance = bundle["balance"]
@@ -147,7 +157,7 @@ def render_eda_tab(settings: Settings, minute: int, team: str) -> None:
         st.plotly_chart(fig, width='stretch')
 
     render_card(
-        "Class Balance", "类别平衡",
+        "Base Win Rate", "基本胜率",
         f"{team} win rate across the pulled matches.",
         _balance_body,
         status_text=f"{win_rate:.1%}",
@@ -193,14 +203,28 @@ def render_eda_tab(settings: Settings, minute: int, team: str) -> None:
     def _hist_body():
         fig = go.Figure()
         for col in feature_cols:
-            en, _ = lane_labels[col]
-            fig.add_trace(go.Histogram(x=scaled_df[col], name=en, opacity=0.6))
-        fig.update_layout(barmode="overlay", height=350, margin=dict(l=10, r=10, t=10, b=10))
+            en, zh = lane_labels[col]
+            fig.add_trace(go.Histogram(
+                x=scaled_df[col] * settings.model.gold_scale,
+                name=f"{en} ({zh})",
+                opacity=0.6,
+            ))
+        fig.update_layout(
+            barmode="overlay",
+            height=350,
+            margin=dict(l=10, r=10, t=10, b=10),
+            xaxis_title="Gold diff (g) · 金币差别",
+            legend=dict(
+                orientation="h",
+                yanchor="bottom", y=1.0,
+                xanchor="center", x=0.5,
+            ),
+        )
         st.plotly_chart(fig, width='stretch')
-        st.caption("Tip: click a lane in the legend to hide/show it.")
+        st.caption("Tip: click a lane in the legend to hide/show it · 按住上面分路按钮则展示/隐藏其分布")
 
     render_card(
-        "Gold Diff Distribution by Lane", "各分路经济差分布",
+        "Gold Diff Distribution by Lane", "分路和其金币分布",
         f"Histogram of lane gold diff at minute {minute}, per {settings.model.gold_scale:.0f}g unit.",
         _hist_body,
     )

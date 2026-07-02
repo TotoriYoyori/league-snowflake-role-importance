@@ -89,9 +89,9 @@ class UISettings(BaseModel):
 
     app_title: str = "Role Importance"
     app_subtitle_en: str = "League of Legends Lane Quest Impact — Win Coefficient Tracker"
-    app_subtitle_zh: str = "英雄联盟符文任务影响 — 分路胜率系数追踪"
+    app_subtitle_zh: str = "英雄联盟分路任务 — 其影响以及胜率系数追踪"
     tab_labels: tuple[tuple[str, str], ...] = (
-        ("EDA", "探索性分析"),
+        ("EDA", "分析一览"),
         ("Model Evaluation", "模型评估"),
         ("Lane Importance", "分路重要性"),
         ("Predictor", "预测器"),

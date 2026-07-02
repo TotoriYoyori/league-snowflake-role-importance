@@ -7,7 +7,7 @@ textColor = "#1a1a1a"
 font = "sans serif"
 
 [server]
-enableStaticServing = true
+enableStaticServing = false
 
 [browser]
 gatherUsageStats = false
