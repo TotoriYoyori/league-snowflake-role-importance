@@ -54,7 +54,7 @@ def render_card(
     name_en: str,
     name_zh: str,
     desc_en: str,
-    body: Callable[[], None],
+    body: Callable[[], object],
     status_text: str | None = None,
     status_level: str = PILL_NEUTRAL,
 ) -> None:
@@ -78,11 +78,11 @@ def render_card(
 def _df_body(
     df: pd.DataFrame,
     hide_index: bool = True
-) -> Callable[[], None]:
+) -> Callable[[], object]:
     return lambda: st.dataframe(
         df,
         width='stretch',
-        height='stretch',
+        height=min(35 * (len(df) + 1) + 3, 400), # Manual work around cuz Streamlit sucks
         hide_index=hide_index
     )
 
@@ -148,7 +148,10 @@ def render_eda_tab(settings: Settings, minute: int, team: str) -> None:
             y=balance["count"],
             text=[f"{p:.1%}" for p in balance["proportion"]],
             textposition="outside",
-            marker_color=["#a81818" if labels.get(idx) == "Loss" else "#2f9e63" for idx in balance.index],
+            marker=dict(color=[
+                "#a81818" if labels.get(idx) == "Loss" else "#2f9e63"
+                for idx in balance.index
+            ]),
         ))
         fig.update_layout(
             yaxis_title="Match count", height=280,
@@ -313,7 +316,7 @@ def render_importance_tab(settings: Settings, minute: int, team: str, n_splits: 
             y=lane_df["lane"],
             orientation="h",
             error_x=dict(type="data", array=lane_df["odds_ratio_err"]),
-            marker_color="#a81818",
+            marker=dict(color="#a81818"),
         ))
         fig.add_vline(x=1.0, line_dash="dash", line_color="gray")
         fig.update_layout(
