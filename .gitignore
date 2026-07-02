@@ -16,7 +16,6 @@ env/
 ENV/
 
 # --------------- Package managers (uv / pip / conda) ---------------
-uv.lock
 .uv/
 pip-log.txt
 pip-delete-this-directory.txt
@@ -32,8 +31,6 @@ pip-delete-this-directory.txt
 Thumbs.db
 
 # --------------- Streamlit ---------------
-# Local secrets file — never commit credentials. .streamlit/config.toml
-# (theme/server settings) is fine to keep tracked; secrets.toml is not.
 .streamlit/secrets.toml
 
 # --------------- Snowflake CLI ---------------
@@ -54,3 +51,5 @@ htmlcov/
 
 # --------------- Logs ---------------
 *.log
+
+# NOTE: assets/sample_data/*.csv is intentionally NOT ignored — this is required mock data for demo.
