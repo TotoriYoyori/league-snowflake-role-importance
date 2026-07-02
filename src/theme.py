@@ -149,7 +149,7 @@ div[data-testid="stVerticalBlockBorderWrapper"]:has(> div > div[data-testid="stV
     color: var(--card-bg);
 }
 
-/* ---------- Sidebar form controls ---------- */
+/* ---------- Sidebar: Slider (track, thumb, and value labels) ---------- */
 [data-testid="stSidebar"] [data-testid="stSlider"] [data-baseweb="slider"] > div > div {
     background-color: rgba(255, 255, 255, 0.25);
 }
@@ -157,12 +157,22 @@ div[data-testid="stVerticalBlockBorderWrapper"]:has(> div > div[data-testid="stV
     background-color: var(--card-bg);
     border-color: var(--card-bg);
 }
+[data-testid="stSidebar"] [data-testid="stSlider"] [data-testid="stSliderThumbValue"],
+[data-testid="stSidebar"] [data-testid="stSlider"] [data-testid="stTickBar"],
+[data-testid="stSidebar"] [data-testid="stSlider"] [data-testid="stSliderThumbValue"] p,
+[data-testid="stSidebar"] [data-testid="stSlider"] [data-testid="stTickBar"] p {
+    color: var(--card-bg) !important;
+}
+
+/* ---------- Sidebar: Number/Text input ---------- */
 [data-testid="stSidebar"] [data-testid="stNumberInput"] input,
 [data-testid="stSidebar"] [data-testid="stTextInput"] input {
     background-color: rgba(255, 255, 255, 0.92);
     color: var(--ink);
     border-radius: 6px;
 }
+
+/* ---------- Sidebar: Selectbox ---------- */
 [data-testid="stSidebar"] [data-testid="stSelectbox"] > div {
     background-color: rgba(255, 255, 255, 0.92);
     border-radius: 6px;

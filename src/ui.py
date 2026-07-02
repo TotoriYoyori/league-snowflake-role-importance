@@ -136,17 +136,18 @@ def render_eda_tab(settings: Settings, minute: int, team: str) -> None:
     is_balanced = 0.4 <= win_rate <= 0.6
 
     def _balance_body():
-        labels = {0: "Loss", 1: "Win"}
+        labels = {
+            0: "Loss",
+            1: "Win"
+        }
+        order = [1, 0]
         fig = go.Figure()
         fig.add_trace(go.Bar(
-            x=[labels.get(idx, str(idx)) for idx in balance.index],
-            y=balance["count"],
-            text=[f"{p:.1%}" for p in balance["proportion"]],
+            x=[labels[idx] for idx in order],
+            y=[balance.loc[idx, "count"] if idx in balance.index else 0 for idx in order],
+            text=[f"{balance.loc[idx, 'proportion']:.1%}" if idx in balance.index else "0.0%" for idx in order],
             textposition="outside",
-            marker=dict(color=[
-                "#a81818" if labels.get(idx) == "Loss" else "#2f9e63"
-                for idx in balance.index
-            ]),
+            marker=dict(color=["#2f9e63", "#a81818"]),
         ))
         fig.update_layout(
             yaxis_title="Match count", height=280,
@@ -320,7 +321,7 @@ def render_importance_tab(settings: Settings, minute: int, team: str, n_splits: 
             height=380,
             margin=dict(l=10, r=10, t=10, b=10),
         )
-        st.plotly_chart(fig, width='stretch')
+        st.plotly_chart(fig)
 
     render_card(
         "Lane Importance", "分路重要性",
@@ -425,7 +426,7 @@ def render_predictor_tab(settings: Settings, minute: int, team: str) -> None:
     preset_cols = st.columns(len(PREDICTOR_PRESETS))
     for preset_col, preset_name in zip(preset_cols, PREDICTOR_PRESETS):
         with preset_col:
-            if st.button(preset_name, width="stretch"):
+            if st.button(preset_name):
                 _apply_preset(preset_name, feature_cols, bounds, step, gold_scale)
                 st.rerun()
 
