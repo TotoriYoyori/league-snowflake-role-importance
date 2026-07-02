@@ -6,8 +6,8 @@ import os
 import pandas as pd
 
 # --------------- FILE NAME CONSTANTS ---------------
-DIFF_INTERVAL_CSV = "s500_diff_interval_state.csv"
-MATCH_SUMMARY_CSV = "s500_match_team_stats_summary.csv"
+DIFF_INTERVAL_CSV = "s1000_diff_interval_state.csv"
+MATCH_SUMMARY_CSV = "s1000_match_team_stats_summary.csv"
 
 
 # --------------- READ ASSETS/SAMPLE_DATA MOCK CSV ---------------

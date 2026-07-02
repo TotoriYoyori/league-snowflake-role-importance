@@ -3,6 +3,7 @@ import pandas as pd
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import RepeatedKFold
 
+from src.model.evaluation import fit_logistic_regression
 
 # --------------- FULL-DATA FIT (MODEL OF RECORD) ---------------
 def fit_full_data_model(

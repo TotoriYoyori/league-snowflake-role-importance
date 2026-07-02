@@ -50,7 +50,7 @@ html, body, [class*="css"] {
     color: var(--ink-faint);
 }
 
-/* ---------- Section header (mirrors pm-layer-header) ---------- */
+/* ---------- Section header ---------- */
 .ri-section-header {
     display: flex;
     align-items: baseline;

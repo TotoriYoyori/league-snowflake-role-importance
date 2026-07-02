@@ -9,8 +9,6 @@ st.set_page_config(
 )
 
 settings = get_settings()
-theme.inject(st)
-ui.render_header(settings)
 
 with st.sidebar:
     st.markdown("### Configuration · 配置")
@@ -49,6 +47,9 @@ with st.sidebar:
         "Lane Importance and Predictor share one model fit on all "
         "available data; Model Evaluation uses a held-out test split."
     )
+
+theme.inject(st)
+ui.render_header(settings)
 
 tab_eda, tab_eval, tab_importance, tab_predictor = st.tabs(
     [f"{en} · {zh}" for en, zh in settings.ui.tab_labels]
