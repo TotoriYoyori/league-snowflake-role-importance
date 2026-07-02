@@ -79,12 +79,7 @@ def _df_body(
     df: pd.DataFrame,
     hide_index: bool = True
 ) -> Callable[[], object]:
-    return lambda: st.dataframe(
-        df,
-        width='stretch',
-        height=min(35 * (len(df) + 1) + 3, 400), # Manual work around cuz Streamlit sucks
-        hide_index=hide_index
-    )
+    return lambda: st.dataframe(df, hide_index=hide_index)
 
 def _highlight_correlation(val: float) -> str:
     """Background color for a correlation cell:"""
@@ -157,7 +152,7 @@ def render_eda_tab(settings: Settings, minute: int, team: str) -> None:
             yaxis_title="Match count", height=280,
             margin=dict(l=10, r=10, t=30, b=10), showlegend=False,
         )
-        st.plotly_chart(fig, width='stretch')
+        st.plotly_chart(fig)
 
     render_card(
         "Base Win Rate", "基本胜率",
@@ -178,7 +173,7 @@ def render_eda_tab(settings: Settings, minute: int, team: str) -> None:
             .round(3)
             .style.map(_highlight_correlation)
         )
-        st.dataframe(styled, width='stretch', hide_index=False)
+        st.dataframe(styled, hide_index=False)
 
     if max_offdiag > 0.7:
         corr_pill_level = PILL_FAIL
@@ -223,7 +218,7 @@ def render_eda_tab(settings: Settings, minute: int, team: str) -> None:
                 xanchor="center", x=0.5,
             ),
         )
-        st.plotly_chart(fig, width='stretch')
+        st.plotly_chart(fig)
         st.caption("Tip: click a lane in the legend to hide/show it · 按住上面分路按钮则展示/隐藏其分布")
 
     render_card(
@@ -262,7 +257,7 @@ def render_evaluation_tab(settings: Settings, minute: int, team: str) -> None:
             xaxis_title="False Positive Rate", yaxis_title="True Positive Rate",
             height=380, margin=dict(l=10, r=10, t=10, b=10),
         )
-        st.plotly_chart(fig, width='stretch')
+        st.plotly_chart(fig)
 
     render_card(
         "ROC Curve", "ROC 曲线",
