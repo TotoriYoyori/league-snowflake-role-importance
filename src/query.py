@@ -8,8 +8,6 @@ class DiffIntervalByMatch(BaseModel):
 
     model_config = ConfigDict(frozen=True)
 
-    database: str
-    schema_: str
     minute: int = 15
     team: str = "Blue"
     min_game_duration: int = 300
@@ -24,8 +22,8 @@ class DiffIntervalByMatch(BaseModel):
                 M.AVERAGE_RANK,
                 M.GAME_DATE,
                 M.GAME_DURATION
-            FROM {self.database}.{self.schema_}.DIFF_INTERVAL_STATE AS D
-            JOIN {self.database}.{self.schema_}.MATCH_TEAM_STATS_SUMMARY AS M
+            FROM LEAGUE_RECORDS.GOLD.DIFF_INTERVAL_STATE AS D
+            JOIN LEAGUE_RECORDS.GOLD.MATCH_TEAM_STATS_SUMMARY AS M
                 ON D.MATCH_ID = M.MATCH_ID
             WHERE D.MINUTE = {self.minute}
               AND D.TEAM = '{self.team}'

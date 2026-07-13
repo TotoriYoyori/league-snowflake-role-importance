@@ -73,7 +73,6 @@ html, body, [class*="css"] {
 div[data-testid="stVerticalBlockBorderWrapper"]:has(> div > div[data-testid="stVerticalBlock"] .ri-card-title) {
     background-color: var(--card-bg);
     border: 1px solid var(--card-border) !important;
-    border-radius: 10px !important;
     padding: 0.9rem 1rem;
     margin-bottom: 0.9rem;
 }
@@ -116,7 +115,6 @@ div[data-testid="stVerticalBlockBorderWrapper"]:has(> div > div[data-testid="stV
 /* ---------- Dataframe tweaks ---------- */
 [data-testid="stDataFrame"] {
     border: 1px solid var(--subtle-border);
-    border-radius: 8px;
     overflow: hidden;
     background-color: var(--page-bg);
 }
@@ -125,7 +123,6 @@ div[data-testid="stVerticalBlockBorderWrapper"]:has(> div > div[data-testid="stV
 [data-testid="stMetric"] {
     background-color: var(--card-bg);
     border: 1px solid var(--card-border);
-    border-radius: 10px;
     padding: 0.6rem 0.9rem;
 }
 

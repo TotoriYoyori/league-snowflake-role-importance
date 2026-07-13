@@ -10,7 +10,17 @@ from settings import Settings
 from src import data as d
 from src.model import predict_win_probability
 
-# --------------- UI PILLS ---------------
+# --------------- CONSTANTS ---------------
+APP_TITLE = "Role Importance"
+APP_SUBTITLE_EN = "League of Legends Lane Quest Impact — Win Coefficient Tracker"
+APP_SUBTITLE_ZH = "英雄联盟分路任务 — 其影响以及胜率系数追踪"
+TAB_LABELS = (
+    ("EDA", "分析一览"),
+    ("Model Evaluation", "模型评估"),
+    ("Lane Importance", "分路重要性"),
+    ("Predictor", "预测器"),
+)
+
 PILL_OK = "ri-pill-ok"
 PILL_WARN = "ri-pill-warn"
 PILL_FAIL = "ri-pill-fail"
@@ -22,15 +32,15 @@ def _pill(text: str, level: str = PILL_NEUTRAL) -> str:
 
 
 # --------------- HEADER ---------------
-def render_header(settings: Settings) -> None:
-    mode_label = "Local / Mock" if settings.is_local else "Snowflake (live)"
-    mode_level = PILL_NEUTRAL if settings.is_local else PILL_OK
+def render_header() -> None:
+    mode_label = "Local / Mock" if d.IS_LOCAL else "Snowflake (live)"
+    mode_level = PILL_NEUTRAL if d.IS_LOCAL else PILL_OK
     st.markdown(
         textwrap.dedent(f"""
         <div class="ri-header">
-            <div class="ri-title">{settings.ui.app_title} {_pill(mode_label, mode_level)}</div>
-            <div class="ri-subtitle-en">{settings.ui.app_subtitle_en}</div>
-            <div class="ri-subtitle-zh">{settings.ui.app_subtitle_zh}</div>
+            <div class="ri-title">{APP_TITLE} {_pill(mode_label, mode_level)}</div>
+            <div class="ri-subtitle-en">{APP_SUBTITLE_EN}</div>
+            <div class="ri-subtitle-zh">{APP_SUBTITLE_ZH}</div>
         </div>
         """),
         unsafe_allow_html=True,
@@ -48,7 +58,6 @@ def render_section_header(en: str, zh: str) -> None:
         unsafe_allow_html=True,
     )
 
-print('')
 # --------------- CARD (generalized: body is a render callback, not just a df) ---------------
 def render_card(
     name_en: str,
@@ -117,11 +126,16 @@ def render_context_caption(df: pd.DataFrame) -> None:
 # ===========================================================================
 # TAB 1: EDA
 # ===========================================================================
-def render_eda_tab(settings: Settings, minute: int, team: str) -> None:
-    scaled_df, n_dropped = d.get_pivoted_data(settings, minute, team)
-    bundle = d.get_eda_bundle(settings, minute, team)
-    feature_cols = list(settings.model.feature_cols)
-    lane_labels = settings.model.lane_labels
+def render_eda_tab(settings: Settings, minute: int, team: str, min_game_duration: int) -> None:
+    scaled_df, n_dropped = d.get_pivoted_data(settings, minute, team, min_game_duration)
+    error = d.load_error(scaled_df)
+    if error is not None:
+        st.error(f"Failed to load EDA data: {error}")
+        return
+
+    bundle = d.get_eda_bundle(settings, minute, team, min_game_duration)
+    feature_cols = list(settings.feature_cols)
+    lane_labels = settings.lane_labels
 
     render_context_caption(scaled_df)
     if n_dropped:
@@ -204,7 +218,7 @@ def render_eda_tab(settings: Settings, minute: int, team: str) -> None:
         for col in feature_cols:
             en, zh = lane_labels[col]
             fig.add_trace(go.Histogram(
-                x=scaled_df[col] * settings.model.gold_scale,
+                x=scaled_df[col] * settings.gold_scale,
                 name=f"{en} ({zh})",
                 opacity=0.6,
             ))
@@ -224,7 +238,7 @@ def render_eda_tab(settings: Settings, minute: int, team: str) -> None:
 
     render_card(
         "Gold Diff Distribution by Lane", "分路和其金币分布",
-        f"Histogram of lane gold diff at minute {minute}, per {settings.model.gold_scale:.0f}g unit.",
+        f"Histogram of lane gold diff at minute {minute}, per {settings.gold_scale:.0f}g unit.",
         _hist_body,
     )
 
@@ -232,14 +246,18 @@ def render_eda_tab(settings: Settings, minute: int, team: str) -> None:
 # ===========================================================================
 # TAB 2: MODEL EVALUATION
 # ===========================================================================
-def render_evaluation_tab(settings: Settings, minute: int, team: str) -> None:
-    bundle = d.get_eval_bundle(settings, minute, team)
+def render_evaluation_tab(settings: Settings, minute: int, team: str, min_game_duration: int) -> None:
+    bundle = d.get_eval_bundle(settings, minute, team, min_game_duration)
+    if "error" in bundle:
+        st.error(f"Failed to load evaluation data: {bundle['error']}")
+        return
+
     metrics = bundle["metrics"]
     auc = metrics["auc"]
 
-    if auc >= settings.model.auc_ok_threshold:
+    if auc >= settings.auc_ok_threshold:
         auc_level, auc_text = PILL_OK, f"AUC {auc:.3f} — OK"
-    elif auc >= settings.model.auc_warn_threshold:
+    elif auc >= settings.auc_warn_threshold:
         auc_level, auc_text = PILL_WARN, f"AUC {auc:.3f} — WARN"
     else:
         auc_level, auc_text = PILL_FAIL, f"AUC {auc:.3f} — FAIL"
@@ -301,9 +319,20 @@ def render_evaluation_tab(settings: Settings, minute: int, team: str) -> None:
 # ===========================================================================
 # TAB 3: LANE IMPORTANCE
 # ===========================================================================
-def render_importance_tab(settings: Settings, minute: int, team: str, n_splits: int, n_repeats: int) -> None:
-    lane_df = d.get_lane_importance(settings, minute, team, n_splits, n_repeats)
-    coef_df = d.get_full_model_coefficients(settings, minute, team)
+def render_importance_tab(
+    settings: Settings, minute: int, team: str, n_splits: int, n_repeats: int, min_game_duration: int
+) -> None:
+    lane_df = d.get_lane_importance(settings, minute, team, n_splits, n_repeats, min_game_duration)
+    error = d.load_error(lane_df)
+    if error is not None:
+        st.error(f"Failed to load lane importance data: {error}")
+        return
+
+    coef_df = d.get_full_model_coefficients(settings, minute, team, min_game_duration)
+    error = d.load_error(coef_df)
+    if error is not None:
+        st.error(f"Failed to load model coefficients: {error}")
+        return
 
     def _importance_body():
         fig = go.Figure()
@@ -316,7 +345,7 @@ def render_importance_tab(settings: Settings, minute: int, team: str, n_splits: 
         ))
         fig.add_vline(x=1.0, line_dash="dash", line_color="gray")
         fig.update_layout(
-            xaxis_title=f"Odds ratio per {settings.model.gold_scale:.0f}g lead",
+            xaxis_title=f"Odds ratio per {settings.gold_scale:.0f}g lead",
             yaxis=dict(autorange="reversed"),
             height=380,
             margin=dict(l=10, r=10, t=10, b=10),
@@ -325,7 +354,7 @@ def render_importance_tab(settings: Settings, minute: int, team: str, n_splits: 
 
     render_card(
         "Lane Importance", "分路重要性",
-        f"Odds multiplier per {settings.model.gold_scale:.0f}g lead, mean ± 95% CI over {n_splits}x{n_repeats} CV, "
+        f"Odds multiplier per {settings.gold_scale:.0f}g lead, mean ± 95% CI over {n_splits}x{n_repeats} CV, "
         "fit on all available data. Track this across patches to see which lane's gold lead most decides game outcome. "
         "For train-split p-value significance testing, see Model Evaluation.",
         _importance_body,
@@ -391,7 +420,10 @@ def _apply_preset(
     feature_cols: list[str],
     bounds: dict,
     step: float,
-    gold_scale: float
+    gold_scale: float,
+    minute: int,
+    team: str,
+    min_game_duration: int,
 ) -> None:
     preset = PREDICTOR_PRESETS[preset_name]
     for feature in feature_cols:
@@ -402,16 +434,20 @@ def _apply_preset(
 
         target = hi_raw * frac if frac >= 0 else lo_raw * abs(frac)
         target = round(target / step) * step
-        st.session_state[f"predictor_{feature}"] = float(target)
+        st.session_state[f"predictor_{feature}_{minute}_{team}_{min_game_duration}"] = float(target)
 
 
-def render_predictor_tab(settings: Settings, minute: int, team: str) -> None:
-    feature_cols = list(settings.model.feature_cols)
-    lane_labels = settings.model.lane_labels
-    bounds = d.get_predictor_bounds(settings, minute, team)
-    model = d.get_full_model(settings, minute, team)
-    gold_scale = settings.model.gold_scale
-    step = settings.model.predictor_slider_step
+def render_predictor_tab(settings: Settings, minute: int, team: str, min_game_duration: int) -> None:
+    feature_cols = list(settings.feature_cols)
+    lane_labels = settings.lane_labels
+    bounds = d.get_predictor_bounds(settings, minute, team, min_game_duration)
+    model = d.get_full_model(settings, minute, team, min_game_duration)
+    if model is None:
+        st.error("Failed to load model — predictor unavailable.")
+        return
+
+    gold_scale = settings.gold_scale
+    step = settings.predictor_slider_step
 
     render_section_header("Lane Gold Diff", "各分路经济差")
     st.caption(
@@ -426,8 +462,8 @@ def render_predictor_tab(settings: Settings, minute: int, team: str) -> None:
     preset_cols = st.columns(len(PREDICTOR_PRESETS))
     for preset_col, preset_name in zip(preset_cols, PREDICTOR_PRESETS):
         with preset_col:
-            if st.button(preset_name):
-                _apply_preset(preset_name, feature_cols, bounds, step, gold_scale)
+            if st.button(preset_name, key=f"preset_{preset_name}_{minute}_{team}_{min_game_duration}"):
+                _apply_preset(preset_name, feature_cols, bounds, step, gold_scale, minute, team, min_game_duration)
                 st.rerun()
 
     gold_diffs = {}
@@ -436,18 +472,23 @@ def render_predictor_tab(settings: Settings, minute: int, team: str) -> None:
         en, zh = lane_labels[feature]
         lo_scaled, hi_scaled = bounds.get(
             feature,
-            (settings.model.predictor_slider_min / gold_scale, settings.model.predictor_slider_max / gold_scale),
+            (settings.predictor_slider_min / gold_scale, settings.predictor_slider_max / gold_scale),
         )
         lo_raw = round((lo_scaled * gold_scale) / step) * step
         hi_raw = round((hi_scaled * gold_scale) / step) * step
 
-        slider_key = f"predictor_{feature}"
+        # Keyed on (minute, team, min_game_duration, feature): bounds shift with
+        # any of the first three, so a value carried over from a different
+        # combo could fall outside the new [lo_raw, hi_raw] range and make
+        # st.slider raise. Keying the session-state slot on all of them resets
+        # the slider cleanly instead.
+        slider_key = f"predictor_{feature}_{minute}_{team}_{min_game_duration}"
         if slider_key not in st.session_state:
             st.session_state[slider_key] = 0.0  # seed once, only if not already set
 
         with col:
             raw_value = st.slider(
-                f"{en} ({zh})",
+                         f"{en} ({zh})",
                 min_value=float(lo_raw), max_value=float(hi_raw),
                 step=float(step),
                 format="%.0f",

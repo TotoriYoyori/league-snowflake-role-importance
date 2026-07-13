@@ -14,7 +14,6 @@ entities:
       - settings.py
       - src/__init__.py
       - src/query.py
-      - src/mock.py
       - src/data.py
       - src/theme.py
       - src/ui.py
@@ -24,6 +23,5 @@ entities:
       - src/model/evaluation.py
       - src/model/importance.py
       - src/model/predictor.py
-      - environment.yml
       - .streamlit/config.toml
       - assets/
