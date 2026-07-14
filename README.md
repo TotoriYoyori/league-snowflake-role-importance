@@ -56,7 +56,7 @@ LeagueSnowflakeRoleImportance/
 Model, in short:
 
 - **Features:** each lane's gold diff at a chosen minute (Top / Jungle / Middle / Bottom / Support), scaled
-  to per-1,000g units (scale up small p, and also aid with general interpretation)
+  to per-1,000g units (scale up small p, and also aid with general interpretation).
 - **Target:** did the selected team win.
 - Early-minute models tend to score lower on AUC than late-minute ones, there's just more game left to be  played. 
 The Model Evaluation tab's pill flags when to trust a given minute's coefficients less.
@@ -83,10 +83,8 @@ Runs against the bundled 1,000-match CSV sample by default, this is also how the
 [live demo](https://league-sf-role-importance.streamlit.app/) runs, since it has no Snowflake session to
 detect. If you want to see the schema directly, the CSVs are under `assets/sample_data`.
 
-This repo is attached as a subfolder under the parent [`league-snowflake`](https://github.com/TotoriYoyori/league-snowflake)
-repo, so deployment against live Snowflake data isn't done from here directly — it's run from the parent
-repo, via Snowsight, which switches the app into live mode automatically once it's running inside
-Snowflake.
+This repo is attached as a subfolder under the parent [`league-snowflake`](https://github.com/TotoriYoyori/league-snowflake).
+Running from the parent repo will automatically register this app to query live from the database.
 
 Known limitations
 ------------------
