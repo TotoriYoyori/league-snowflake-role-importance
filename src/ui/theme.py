@@ -16,14 +16,12 @@ PALETTE = {
 FONT_MAIN = '"Noto Sans SC", system-ui, sans-serif'
 DEFAULT_MARGIN = dict(l=10, r=10, t=10, b=10)
 
-# --------------- HELPER ---------------
 def hex_to_rgba(hex_color: str, alpha: float) -> str:
     hex_color = hex_color.lstrip("#")
     r, g, b = (int(hex_color[i:i + 2], 16) for i in (0, 2, 4))
     return f"rgba({r}, {g}, {b}, {alpha})"
 
 
-# --------------- CSS (root vars generated from PALETTE, rest is static) ---------------
 _ROOT_VARS = "\n".join(f"    --{k.replace('_', '-')}: {v};" for k, v in PALETTE.items())
 _ROOT_VARS += f"\n    --font-main: {FONT_MAIN};"
 
@@ -50,7 +48,6 @@ html, body, [class*="css"] {
     background-color: transparent;
 }
 
-/* ---------- App header ---------- */
 .ri-header {
     display: flex;
     flex-direction: column;
@@ -71,7 +68,6 @@ html, body, [class*="css"] {
     color: var(--ink-faint);
 }
 
-/* ---------- Section header ---------- */
 .ri-section-header {
     display: flex;
     align-items: baseline;
@@ -90,7 +86,6 @@ html, body, [class*="css"] {
     color: var(--ink-faint);
 }
 
-/* ---------- Card ---------- */
 div[data-testid="stVerticalBlockBorderWrapper"]:has(> div > div[data-testid="stVerticalBlock"] .ri-card-title) {
     background-color: var(--card-bg);
     border: 1px solid var(--card-border) !important;
@@ -117,7 +112,6 @@ div[data-testid="stVerticalBlockBorderWrapper"]:has(> div > div[data-testid="stV
     margin-top: 1px;
 }
 
-/* ---------- Status pill ---------- */
 .ri-pill {
     display: inline-flex;
     align-items: center;
@@ -133,14 +127,12 @@ div[data-testid="stVerticalBlockBorderWrapper"]:has(> div > div[data-testid="stV
 .ri-pill-fail { background-color: __PILL_FAIL_BG__; color: var(--red); }
 .ri-pill-neutral { background-color: var(--thead-bg); color: var(--ink-soft); }
 
-/* ---------- Dataframe tweaks ---------- */
 [data-testid="stDataFrame"] {
     border: 1px solid var(--subtle-border);
     overflow: hidden;
     background-color: var(--page-bg);
 }
 
-/* ---------- Metric tweaks ---------- */
 [data-testid="stMetric"] {
     background-color: var(--card-bg);
     border: 1px solid var(--card-border);
@@ -155,7 +147,6 @@ div[data-testid="stVerticalBlockBorderWrapper"]:has(> div > div[data-testid="stV
     color: var(--ink-soft);
 }
 
-/* ---------- Sidebar ---------- */
 [data-testid="stSidebar"] {
     background-color: var(--dark-red);
     border-right: 1px solid var(--card-border);
@@ -167,7 +158,6 @@ div[data-testid="stVerticalBlockBorderWrapper"]:has(> div > div[data-testid="stV
     color: var(--card-bg);
 }
 
-/* ---------- Sidebar: Slider (track, thumb, and value labels) ---------- */
 [data-testid="stSidebar"] [data-testid="stSlider"] [data-baseweb="slider"] > div > div {
     background-color: rgba(255, 255, 255, 0.25);
 }
@@ -182,7 +172,6 @@ div[data-testid="stVerticalBlockBorderWrapper"]:has(> div > div[data-testid="stV
     color: var(--card-bg) !important;
 }
 
-/* ---------- Sidebar: Number/Text input ---------- */
 [data-testid="stSidebar"] [data-testid="stNumberInput"] input,
 [data-testid="stSidebar"] [data-testid="stTextInput"] input {
     background-color: rgba(255, 255, 255, 0.92);
@@ -190,13 +179,11 @@ div[data-testid="stVerticalBlockBorderWrapper"]:has(> div > div[data-testid="stV
     border-radius: 6px;
 }
 
-/* ---------- Sidebar: Selectbox ---------- */
 [data-testid="stSidebar"] [data-testid="stSelectbox"] > div {
     background-color: rgba(255, 255, 255, 0.92);
     border-radius: 6px;
 }
 
-/* ---------- Tab bar ---------- */
 [data-testid="stTabs"] [data-baseweb="tab-list"] {
     gap: 4px;
     border-bottom: 2px solid var(--card-border);
@@ -211,7 +198,6 @@ div[data-testid="stVerticalBlockBorderWrapper"]:has(> div > div[data-testid="stV
     border-bottom: 3px solid var(--dark-red);
 }
 
-/* ---------- Chart container ---------- */
 [data-testid="stPlotlyChart"] {
     background-color: var(--card-bg);
     border: 1px solid var(--card-border);

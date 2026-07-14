@@ -55,6 +55,17 @@ def _slider_key(
     return f"predictor_{feature}_{minute}_{team}_{min_game_duration}"
 
 
+def _prune_stale_slider_keys(minute: int, team: str, min_game_duration: int) -> None:
+    """Evict compiling state keys if you play with the sliders too much"""
+    current_suffix = f"_{minute}_{team}_{min_game_duration}"
+    stale_keys = [
+        key for key in st.session_state
+        if key.startswith("predictor_") and not key.endswith(current_suffix)
+    ]
+    for key in stale_keys:
+        del st.session_state[key]
+
+
 def _apply_preset(
     preset_name: str,
     feature_cols: list[str],
@@ -79,6 +90,8 @@ def _apply_preset(
 
 # --------------- RENDERING ---------------
 def render_predictor_tab(settings: Settings, minute: int, team: str, min_game_duration: int) -> None:
+    _prune_stale_slider_keys(minute, team, min_game_duration)
+
     feature_cols = list(settings.feature_cols)
     lane_labels = settings.lane_labels
     bounds = data.get_predictor_bounds(settings, minute, team, min_game_duration)
