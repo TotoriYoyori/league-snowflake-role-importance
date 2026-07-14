@@ -51,5 +51,3 @@ htmlcov/
 
 # --------------- Logs ---------------
 *.log
-
-# NOTE: assets/sample_data/*.csv is intentionally NOT ignored — this is required mock data for demo.
