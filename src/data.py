@@ -4,7 +4,7 @@ import pandas as pd
 import streamlit as st
 
 from settings import Settings
-from src import query
+from src import mock, query
 from src.model import (
     eda,
     evaluation,
@@ -16,34 +16,12 @@ from src.model import (
 
 
 # --------------- CONSTANTS ---------------
-SAMPLE_DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "sample_data")
-
 # SiS session token file only exists inside Snowflake -> use Snowflake live data.
 IS_LOCAL: bool = not os.path.isfile("/snowflake/session/token")
 CACHE_TTL = 600
 
-# --------------- MOCK FETCH (LOCAL MODE ONLY) ---------------
-DIFF_INTERVAL_CSV = "s1000_diff_interval_state.csv"
-MATCH_SUMMARY_CSV = "s1000_match_team_stats_summary.csv"
 
-def _mock_diff_interval_by_match(
-    minute: int,
-    team: str,
-    min_game_duration: int,
-) -> pd.DataFrame:
-    diff = pd.read_csv(os.path.join(SAMPLE_DATA_DIR, DIFF_INTERVAL_CSV))
-    match = pd.read_csv(os.path.join(SAMPLE_DATA_DIR, MATCH_SUMMARY_CSV))
-
-    d = diff[(diff["MINUTE"] == minute) & (diff["TEAM"] == team)]
-    m = match[match["GAME_DURATION"] >= min_game_duration]
-
-    return (d
-        .merge(m, on="MATCH_ID", how="inner")
-        [["MATCH_ID", "LANE", "GOLD_DIFF", "WINNING_TEAM", "AVERAGE_RANK", "GAME_DATE", "GAME_DURATION"]]
-        .reset_index(drop=True)
-    )
-
-
+# --------------- BASE ---------------
 def _failed(message: str) -> pd.DataFrame:
     df = pd.DataFrame()
     df.attrs["error"] = message
@@ -58,6 +36,7 @@ def load_error(df: pd.DataFrame):
 def get_session():
     if IS_LOCAL:
         return None
+
     conn = st.connection("snowflake", ttl=None)
     return conn.session()
 
@@ -66,11 +45,13 @@ def _run(session, sql: str) -> pd.DataFrame:
     return session.sql(sql).to_pandas()
 
 
+# --------------- QUERY ---------------
 @st.cache_data(ttl=CACHE_TTL, show_spinner="Loading gold-diff data…")
 def load_diff_interval_by_match(minute, team, min_game_duration):
     try:
         if IS_LOCAL:
-            return _mock_diff_interval_by_match(minute=minute, team=team, min_game_duration=min_game_duration)
+            return mock.diff_interval_by_match(minute=minute, team=team, min_game_duration=min_game_duration)
+
         diff_query = query.DiffIntervalByMatch(minute=minute, team=team, min_game_duration=min_game_duration)
         return _run(get_session(), diff_query.build())
     except Exception as e:
@@ -127,21 +108,13 @@ def get_eval_bundle(settings: Settings, minute, team, min_game_duration):
 
 @st.cache_resource(ttl=CACHE_TTL)
 def get_full_model(settings: Settings, minute, team, min_game_duration):
-    """cache_resource, not cache_data: returns a live sklearn model object,
-    reused across reruns — the Predictor tab scores against this directly.
-    ttl matches get_pivoted_data's — without it this never expired, so the
-    Predictor tab's model would silently freeze on stale data forever while
-    every other tab kept refreshing on the same 10-minute cadence.
-
-    Do not mutate the returned model in place (e.g. calling .fit() again on
-    it) — cache_resource hands back the same object reference on every hit,
-    unlike cache_data, so an in-place mutation would corrupt this cache slot
-    for every other caller sharing the same key."""
+    """Already fitted model. No need to call .fit() again."""
     scaled_df, _ = get_pivoted_data(settings, minute, team, min_game_duration)
     if load_error(scaled_df) is not None:
         return None
     target_col = f"{team.upper()}_WIN"
     feature_cols = list(settings.feature_cols)
+
     return importance.fit_full_data_model(scaled_df, feature_cols, target_col)
 
 
@@ -162,7 +135,14 @@ def get_stability_summary(settings: Settings, minute, team, n_splits, n_repeats,
         return _failed(error)
     target_col = f"{team.upper()}_WIN"
     feature_cols = list(settings.feature_cols)
-    return importance.coefficient_stability_cv(scaled_df, feature_cols, target_col, n_splits=n_splits, n_repeats=n_repeats, random_state=settings.random_state)
+    return importance.coefficient_stability_cv(
+        scaled_df,
+        feature_cols,
+        target_col,
+        n_splits=n_splits,
+        n_repeats=n_repeats,
+        random_state=settings.random_state
+    )
 
 
 @st.cache_data(ttl=CACHE_TTL)

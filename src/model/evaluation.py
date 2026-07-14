@@ -50,9 +50,7 @@ def statsmodels_coefficient_table(
     feature_cols: list[str],
     target_col: str,
 ) -> pd.DataFrame:
-    """
-    Fits a statsmodels Logit purely for its inferential statistics.
-    """
+    """Fits a statsmodels Logit purely for its inferential statistics."""
     X_sm = sm.add_constant(train_df[feature_cols])
     y_sm = train_df[target_col]
     sm_model = sm.Logit(y_sm, X_sm).fit(disp=0)
@@ -88,10 +86,7 @@ def evaluate_on_test(
     target_col: str,
     threshold: float = 0.5,
 ) -> dict:
-    """threshold is the win/loss decision cutoff on predicted probability —
-    passed explicitly (rather than relying on sklearn's fixed-0.5
-    model.predict()) so it stays in lockstep with preview_predictions()
-    and with whatever the caller configures via Settings.win_loss_threshold."""
+    """threshold is passed explicitly so it stays in sync with preview_predictions() and Settings.win_loss_threshold."""
     X_test = test_df[feature_cols]
     y_test = test_df[target_col]
 
@@ -126,7 +121,6 @@ def roc_curve_data(
     y_test: pd.Series,
     y_proba: np.ndarray,
 ) -> pd.DataFrame:
-    """Returns the fpr/tpr/threshold points; ui.py builds the Plotly ROC
-    plot (needs the diagonal reference line + AUC annotation) on top."""
+    """Returns fpr/tpr/threshold points; ui.py adds the diagonal reference line + AUC annotation."""
     fpr, tpr, thresholds = roc_curve(y_test, y_proba)
     return pd.DataFrame({"fpr": fpr, "tpr": tpr, "threshold": thresholds})

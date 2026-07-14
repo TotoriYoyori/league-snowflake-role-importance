@@ -11,11 +11,6 @@ from src.ui.theme import DEFAULT_MARGIN
 AUC_OK_THRESHOLD = 0.80
 AUC_WARN_THRESHOLD = 0.65
 
-# NOTE: the win/loss decision threshold itself (default 0.5) lives in
-# Settings.win_loss_threshold — it's a modeling concern (affects the
-# confusion matrix / classification report), not a display-only constant
-# like the two above, so it doesn't belong here.
-
 
 # --------------- TAB 2: MODEL EVALUATION ---------------
 def render_evaluation_tab(settings: Settings, minute: int, team: str, min_game_duration: int) -> None:
@@ -52,7 +47,7 @@ def render_evaluation_tab(settings: Settings, minute: int, team: str, min_game_d
 
     render_card(
         "ROC Curve", "ROC 曲线",
-        "Held-out test set performance. Early-minute models tend to score lower — there's more game left to play.",
+        "Held-out test set performance. Early-minute models tend to score lower bc there's more game left to play.",
         _roc_body,
         status_text=auc_text,
         status_level=auc_level,
@@ -76,7 +71,7 @@ def render_evaluation_tab(settings: Settings, minute: int, team: str, min_game_d
     sm_table_labeled = bundle["sm_table"].round(4).rename(columns={"coef": "coef (train-split)"})
     render_card(
         "Coefficient Significance (statsmodels)", "系数显著性（statsmodels）",
-        "p-values and 95% CIs from the train split — for statistical significance "
+        "p-values and 95% CIs from the train split for statistical significance "
         "testing only. Differs from the Lane Importance tab, since this is based on training set.",
         _df_body(sm_table_labeled, hide_index=False),
     )

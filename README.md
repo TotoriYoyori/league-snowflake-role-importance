@@ -15,9 +15,10 @@ also powers a live predictor: type in 5 gold diffs, get a win probability back.
 - `src/query.py` (`DiffIntervalByMatch`): one frozen pydantic model with a `.build()`
   method, run only when deployed against Snowflake.
 - `src/data.py`: owns all data procurement: caches every stage of the pipeline (raw fetch → pivot/scale
-  → EDA → train/test fit → full-data fit → CV stability), reads mock CSVs locally (join done in pandas,
-  mirroring `query.py`'s SQL), and wraps the live/mock fetch in a try/except so a failed load surfaces as
-  a card-level error instead of crashing the app.
+  → EDA → train/test fit → full-data fit → CV stability), and wraps the live/mock fetch in a try/except so
+  a failed load surfaces as a card-level error instead of crashing the app.
+- `src/mock.py`: reads the sample CSVs locally and joins them in pandas, mirroring `query.py`'s SQL, used
+  whenever `data.py` detects it's not running inside Snowflake.
 - `src/model/`: plain pandas/sklearn/statsmodels functions with no Streamlit or Snowflake dependency:
   pivoting, scaling, train/test split, the model fits, CV coefficient stability, and the odds-ratio
   transform. 
@@ -36,6 +37,7 @@ LeagueSnowflakeRoleImportance/
 ├── src/
 │   ├── query.py         # live Snowflake query
 │   ├── data.py          # all data procurement for ui display, and caching
+│   ├── mock.py          # local CSV mock data loading
 │   ├── model/           # pure ds prep/eda/evaluation/importance/predictor functions
 │   └── ui/               # renders: theme (palette + CSS) and components (shared chrome)
 ├── assets/

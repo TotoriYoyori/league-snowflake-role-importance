@@ -35,7 +35,7 @@ with st.sidebar:
         "Min match length (min) · 最短比赛时长（分钟）",
         options=list(settings.min_game_duration_options),
         value=settings.default_min_game_duration_minutes,
-        help="Excludes matches shorter than this — e.g. remakes or very early forfeits · "
+        help="Excludes matches shorter than this e.g. remakes or very early forfeits · "
              "排除短于此时长的对局，例如重开局或早期投降",
     )
     min_game_duration = min_game_duration_minutes * SECONDS_PER_MINUTE  # DB column is in seconds

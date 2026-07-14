@@ -97,7 +97,7 @@ def render_predictor_tab(settings: Settings, minute: int, team: str, min_game_du
     bounds = data.get_predictor_bounds(settings, minute, team, min_game_duration)
     model = data.get_full_model(settings, minute, team, min_game_duration)
     if model is None:
-        st.error("Failed to load model — predictor unavailable.")
+        st.error("Failed to load model. Predictor unavailable.")
         return
 
     gold_scale = settings.gold_scale

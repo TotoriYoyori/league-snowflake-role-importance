@@ -12,10 +12,7 @@ def fit_full_data_model(
     target_col: str,
     **lr_kwargs,
 ) -> LogisticRegression:
-    """
-    Thin semantic wrapper over evaluation.fit_logistic_regression: same fit
-    logic, but called with the FULL dataset (df, not a train split).
-    """
+    """Same fit logic as evaluation.fit_logistic_regression, called on the full dataset instead of a train split."""
     return fit_logistic_regression(
         df, feature_cols, target_col, **lr_kwargs
     )
@@ -29,12 +26,7 @@ def coefficient_stability_cv(
     n_repeats: int = 5,
     random_state: int = 42,
 ) -> pd.DataFrame:
-    """
-    Refits logistic regression across repeated k-folds of the FULL dataset,
-    for a sampling distribution of coefficients. The resulting mean/CI is
-    what gets tracked patch-over-patch (more stable than any single fit,
-    including fit_full_data_model's).
-    """
+    """Refits across repeated k-folds of the full dataset for a sampling distribution of coefficients (more stable than a single fit)."""
     rkf = RepeatedKFold(n_splits=n_splits, n_repeats=n_repeats, random_state=random_state)
 
     X = df[feature_cols]
@@ -68,9 +60,7 @@ def lane_importance(
     stability_summary: pd.DataFrame,
     decimals: int = 4,
 ) -> pd.DataFrame:
-    """
-    Transforms the CV coefficient summary into odds ratios (exp(coef)).
-    """
+    """Transforms the CV coefficient summary into odds ratios (exp(coef))."""
     result = (stability_summary
         .assign(lane=lambda df: df["feature"].str.replace("GOLD_DIFF_", ""))
         .assign(odds_ratio=lambda df: np.exp(df["mean_coef"]))

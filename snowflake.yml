@@ -15,6 +15,7 @@ entities:
       - src/__init__.py
       - src/query.py
       - src/data.py
+      - src/mock.py
       - src/ui/
       - src/model/__init__.py
       - src/model/prep.py

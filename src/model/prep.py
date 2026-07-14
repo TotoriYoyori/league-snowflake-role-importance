@@ -17,12 +17,7 @@ def pivot_diff_interval(
     df: pd.DataFrame,
     win_reference_team: str = "Blue",
 ) -> tuple[pd.DataFrame, int]:
-    """
-    One row per (match, lane) -> one row per match, 5 lane-diff columns +
-    a win flag. Returns (pivoted_df, n_dropped) — n_dropped is the count of
-    matches excluded for incomplete lane data (e.g. malformed participant
-    records), surfaced so the UI can show it rather than a notebook print().
-    """
+    """One row per (match, lane) -> one row per match. n_dropped is the count excluded for incomplete lane data."""
     win_col = f"{win_reference_team.upper()}_WIN"
 
     pivoted_df = (df
@@ -67,9 +62,7 @@ def split_train_test(
     test_size: float = 0.3,
     random_state: int = 42,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Stratified split on the target so win-rate is preserved in both
-    halves. Used only by the Model Evaluation tab — Lane Importance and
-    Predictor both fit on the full, unsplit dataset (see model/importance.py)."""
+    """Stratified split so win-rate is preserved in both halves. Used only by the Model Evaluation tab."""
     train_df, test_df = train_test_split(
         df,
         test_size=test_size,

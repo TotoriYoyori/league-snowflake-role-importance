@@ -16,7 +16,7 @@ def feature_correlation(
     df: pd.DataFrame,
     feature_cols: list[str],
 ) -> pd.DataFrame:
-    """Pairwise correlation between lane gold-diff features — checks
+    """Pairwise correlation between lane gold-diff features, checks
     multicollinearity risk. ui.py renders this as a styled table/heatmap."""
     return df[feature_cols].corr()
 
