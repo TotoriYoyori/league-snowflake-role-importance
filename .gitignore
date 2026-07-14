@@ -16,7 +16,6 @@ env/
 ENV/
 
 # --------------- Package managers (uv / pip / conda) ---------------
-uv.lock
 .uv/
 pip-log.txt
 pip-delete-this-directory.txt
