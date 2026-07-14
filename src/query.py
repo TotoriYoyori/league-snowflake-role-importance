@@ -1,16 +1,23 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, field_validator
+
+from settings import settings
 
 # --------------- QUERY DIRECTLY FROM SNOWFLAKE DATABASE ---------------
 class DiffIntervalByMatch(BaseModel):
-    """
-    Per-lane gold diff at a fixed match minute, joined to match outcome.
-    """
-
     model_config = ConfigDict(frozen=True)
 
     minute: int = 15
     team: str = "Blue"
     min_game_duration: int = 300
+
+    @field_validator("team")
+    @classmethod
+    def _blue_or_red_team(cls, v: str) -> str:
+        allowed = settings.team_options
+        if v not in allowed:
+            raise ValueError(f"team must be one of {allowed}, got {v!r}")
+
+        return v
 
     def build(self) -> str:
         return f"""

@@ -1,10 +1,13 @@
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field
+)
 
 
 class Settings(BaseModel):
     # ----- Data Preparations
     gold_scale: float = Field(default=1000.0, gt=0)
-    test_size: float = Field(default=0.3, gt=0.0, lt=1.0)
     random_state: int = 42
 
     # ----- User Inputs
@@ -13,7 +16,7 @@ class Settings(BaseModel):
     team_options: tuple[str, ...] = ("Blue", "Red")
     default_team: str = "Blue"
 
-    # Minimum match length to include, in minutes — user-adjustable
+    # Only include matches longer or same length as the following duration, in minutes
     min_game_duration_options: tuple[int, ...] = Field(default=(0, 5, 10, 15, 20))
     default_min_game_duration_minutes: int = Field(default=5, ge=0)
 
@@ -51,11 +54,6 @@ class Settings(BaseModel):
         return tuple(f"GOLD_DIFF_{lane.upper()}" for lane in self.raw_lane_names)
 
     @property
-    def lane_rename_map(self) -> dict[str, str]:
-        """Raw LANE value -> pivoted GOLD_DIFF_X column name, e.g. {'Top': 'GOLD_DIFF_TOP'}."""
-        return dict(zip(self.raw_lane_names, self.feature_cols))
-
-    @property
     def lane_labels(self) -> dict[str, tuple[str, str]]:
         """Pivoted column name -> (English, Chinese) display label."""
         return {
@@ -65,4 +63,4 @@ class Settings(BaseModel):
 
 
 # --------------- SINGLETON ---------------
-SETTINGS = Settings()
+settings = Settings()

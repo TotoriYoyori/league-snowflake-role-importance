@@ -111,8 +111,8 @@ def render_context_caption(df: pd.DataFrame) -> None:
     if df.empty:
         return
     date_min, date_max = df["GAME_DATE"].min(), df["GAME_DATE"].max()
-    date_min_str = pd.to_datetime(date_min).strftime("%Y-%m-%d")
-    date_max_str = pd.to_datetime(date_max).strftime("%Y-%m-%d")
+    date_min_str = pd.to_datetime(date_min).strftime("%Y-%m-%data")
+    date_max_str = pd.to_datetime(date_max).strftime("%Y-%m-%data")
 
     rank_counts = df["AVERAGE_RANK"].value_counts()
     top_rank = rank_counts.index[0] if not rank_counts.empty else "n/a"
@@ -123,10 +123,14 @@ def render_context_caption(df: pd.DataFrame) -> None:
         f"{len(df)} matches · most common rank tier: {top_rank} · 共 {len(df)} 场比赛，最常见段位：{top_rank}"
     )
 
-# ===========================================================================
-# TAB 1: EDA
-# ===========================================================================
-def render_eda_tab(settings: Settings, minute: int, team: str, min_game_duration: int) -> None:
+
+# --------------- TAB 1: EDA ---------------
+def render_eda_tab(
+    settings: Settings,
+    minute: int,
+    team: str,
+    min_game_duration: int
+) -> None:
     scaled_df, n_dropped = d.get_pivoted_data(settings, minute, team, min_game_duration)
     error = d.load_error(scaled_df)
     if error is not None:
@@ -199,7 +203,8 @@ def render_eda_tab(settings: Settings, minute: int, team: str, min_game_duration
 
     render_card(
         "Feature Correlation", "特征相关性",
-        "Pairwise correlation between lane gold-diff features (multicollinearity check). Row and column both represent the same 5 features. Cells above |0.5| are highlighted yellow, above |0.7| red.",
+        "Pairwise correlation between lane gold-diff features (multicollinearity check). "
+        "Row and column both represent the same 5 features. Cells above |0.5| are highlighted yellow, above |0.7| red.",
         _corr_body,
         status_text=f"max |r| = {max_offdiag:.2f}",
         status_level=corr_pill_level,
@@ -243,9 +248,7 @@ def render_eda_tab(settings: Settings, minute: int, team: str, min_game_duration
     )
 
 
-# ===========================================================================
-# TAB 2: MODEL EVALUATION
-# ===========================================================================
+# --------------- TAB 2: MODEL EVALUATION ---------------
 def render_evaluation_tab(settings: Settings, minute: int, team: str, min_game_duration: int) -> None:
     bundle = d.get_eval_bundle(settings, minute, team, min_game_duration)
     if "error" in bundle:
@@ -316,11 +319,14 @@ def render_evaluation_tab(settings: Settings, minute: int, team: str, min_game_d
     )
 
 
-# ===========================================================================
-# TAB 3: LANE IMPORTANCE
-# ===========================================================================
+# --------------- TAB 3: LANE IMPORTANCE ---------------
 def render_importance_tab(
-    settings: Settings, minute: int, team: str, n_splits: int, n_repeats: int, min_game_duration: int
+    settings: Settings,
+    minute: int,
+    team: str,
+    n_splits: int,
+    n_repeats: int,
+    min_game_duration: int
 ) -> None:
     lane_df = d.get_lane_importance(settings, minute, team, n_splits, n_repeats, min_game_duration)
     error = d.load_error(lane_df)
@@ -415,6 +421,15 @@ PREDICTOR_PRESETS = {
 }
 
 
+def _slider_key(feature: str, minute: int, team: str, min_game_duration: int) -> str:
+    """Session-state key for one predictor slider. Keyed on (minute, team,
+    min_game_duration, feature): bounds shift with any of the first three, so
+    a value carried over from a different combo could fall outside the new
+    [lo_raw, hi_raw] range and make st.slider raise. Keying on all of them
+    resets the slider cleanly instead."""
+    return f"predictor_{feature}_{minute}_{team}_{min_game_duration}"
+
+
 def _apply_preset(
     preset_name: str,
     feature_cols: list[str],
@@ -434,7 +449,7 @@ def _apply_preset(
 
         target = hi_raw * frac if frac >= 0 else lo_raw * abs(frac)
         target = round(target / step) * step
-        st.session_state[f"predictor_{feature}_{minute}_{team}_{min_game_duration}"] = float(target)
+        st.session_state[_slider_key(feature, minute, team, min_game_duration)] = float(target)
 
 
 def render_predictor_tab(settings: Settings, minute: int, team: str, min_game_duration: int) -> None:
@@ -477,12 +492,7 @@ def render_predictor_tab(settings: Settings, minute: int, team: str, min_game_du
         lo_raw = round((lo_scaled * gold_scale) / step) * step
         hi_raw = round((hi_scaled * gold_scale) / step) * step
 
-        # Keyed on (minute, team, min_game_duration, feature): bounds shift with
-        # any of the first three, so a value carried over from a different
-        # combo could fall outside the new [lo_raw, hi_raw] range and make
-        # st.slider raise. Keying the session-state slot on all of them resets
-        # the slider cleanly instead.
-        slider_key = f"predictor_{feature}_{minute}_{team}_{min_game_duration}"
+        slider_key = _slider_key(feature, minute, team, min_game_duration)
         if slider_key not in st.session_state:
             st.session_state[slider_key] = 0.0  # seed once, only if not already set
 

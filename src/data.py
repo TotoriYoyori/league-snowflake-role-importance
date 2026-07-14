@@ -16,23 +16,24 @@ from src.model import (
 
 
 # --------------- CONSTANTS ---------------
-SAMPLE_DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "sample_data")
+SAMPLE_DATA_DIR = os.path.join(
+    os.path.dirname(os.path.dirname(__file__)),
+    "assets",
+    "sample_data"
+)
+DIFF_INTERVAL_CSV = "s1000_diff_interval_state.csv"
+MATCH_SUMMARY_CSV = "s1000_match_team_stats_summary.csv"
 
 # SiS session token file only exists inside Snowflake -> use Snowflake live data.
 IS_LOCAL: bool = not os.path.isfile("/snowflake/session/token")
 CACHE_TTL = 600
 
 # --------------- MOCK FETCH (LOCAL MODE ONLY) ---------------
-DIFF_INTERVAL_CSV = "s1000_diff_interval_state.csv"
-MATCH_SUMMARY_CSV = "s1000_match_team_stats_summary.csv"
-
 def _mock_diff_interval_by_match(
     minute: int,
     team: str,
     min_game_duration: int,
 ) -> pd.DataFrame:
-    """Mirrors query.py::DiffIntervalByMatch.build() + its execution, but reads
-    from the two vendored CSVs and filters/joins in pandas instead of SQL."""
     diff = pd.read_csv(os.path.join(SAMPLE_DATA_DIR, DIFF_INTERVAL_CSV))
     match = pd.read_csv(os.path.join(SAMPLE_DATA_DIR, MATCH_SUMMARY_CSV))
 
@@ -168,9 +169,6 @@ def get_eval_bundle(
     team: str,
     min_game_duration: int,
 ) -> dict:
-    """Keyed on (minute, team, min_game_duration) — test_size/random_state are
-    fixed constants in Settings (not user-adjustable per current scope)."""
-
     @st.cache_data(ttl=CACHE_TTL)
     def _eval(minute: int, team: str, min_game_duration: int) -> dict:
         scaled_df, _ = get_pivoted_data(settings, minute, team, min_game_duration)
@@ -183,7 +181,6 @@ def get_eval_bundle(
 
         train_df, test_df = prep.split_train_test(
             scaled_df, target_col,
-            test_size=settings.test_size,
             random_state=settings.random_state,
         )
         model = evaluation.fit_logistic_regression(train_df, feature_cols, target_col)

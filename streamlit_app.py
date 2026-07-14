@@ -1,8 +1,14 @@
 import streamlit as st
 
-from settings import SETTINGS as settings
-from src import data as d, theme, ui
+from settings import settings
+from src import data, theme, ui
 
+
+# --------------- CONSTANTS ---------------
+SECONDS_PER_MINUTE = 60
+
+
+# --------------- APP ---------------
 st.set_page_config(
     page_title="LEAGUE_SNOWFLAKE Role Importance",
     layout="wide",
@@ -10,7 +16,7 @@ st.set_page_config(
 
 with st.sidebar:
     st.markdown("### Configuration · 配置")
-    st.caption(f"Environment · 环境: **{'local' if d.IS_LOCAL else 'production'}**")
+    st.caption(f"Environment · 环境: **{'local' if data.IS_LOCAL else 'production'}**")
 
     minute = st.select_slider(
         "Minute · 分钟",
@@ -31,7 +37,7 @@ with st.sidebar:
         help="Excludes matches shorter than this — e.g. remakes or very early forfeits · "
              "排除短于此时长的对局，例如重开局或早期投降",
     )
-    min_game_duration = min_game_duration_minutes * 60  # DB column is in seconds
+    min_game_duration = min_game_duration_minutes * SECONDS_PER_MINUTE  # DB column is in seconds
 
     st.divider()
     st.markdown("#### Cross-Validation · 交叉验证")

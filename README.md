@@ -24,8 +24,8 @@ also powers a live predictor: type in 5 gold diffs, get a win probability back.
 - `src/ui.py` — renders the 4 tabs; cards take a render callback rather than a bare dataframe, since most
   of this app's output is a Plotly chart, not a table.
 - `settings.py` — one frozen pydantic `Settings` tree (Snowflake identifiers, cache TTLs, model
-  hyperparameters, UI copy), built once at import. Validated fields (e.g. `test_size` in `(0, 1)`,
-  `n_splits > 1`) matter here because several of them are user-adjustable from the sidebar.
+  hyperparameters, UI copy), built once at import. Validated fields (e.g. `n_splits > 1`) matter
+  here because several of them are user-adjustable from the sidebar.
 
 ----
 ## Project structure
