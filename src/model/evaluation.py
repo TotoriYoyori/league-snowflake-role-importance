@@ -86,12 +86,17 @@ def evaluate_on_test(
     test_df: pd.DataFrame,
     feature_cols: list[str],
     target_col: str,
+    threshold: float = 0.5,
 ) -> dict:
+    """threshold is the win/loss decision cutoff on predicted probability —
+    passed explicitly (rather than relying on sklearn's fixed-0.5
+    model.predict()) so it stays in lockstep with preview_predictions()
+    and with whatever the caller configures via Settings.win_loss_threshold."""
     X_test = test_df[feature_cols]
     y_test = test_df[target_col]
 
-    y_pred = model.predict(X_test)
     y_proba = model.predict_proba(X_test)[:, 1]
+    y_pred = (y_proba >= threshold).astype(int)
 
     return {
         "auc": roc_auc_score(y_test, y_proba),
@@ -106,11 +111,12 @@ def preview_predictions(
     test_df: pd.DataFrame,
     y_proba: np.ndarray,
     target_col: str,
+    threshold: float = 0.5,
 ) -> pd.DataFrame:
     return (test_df[["MATCH_ID", target_col]]
         .rename(columns={target_col: "actual"})
         .assign(predicted_proba=y_proba)
-        .assign(predicted=(y_proba >= 0.5).astype(int))
+        .assign(predicted=(y_proba >= threshold).astype(int))
         .assign(correct=lambda df: df["actual"] == df["predicted"])
     )
 

@@ -1,19 +1,40 @@
+# --------------- STYLING ---------------
+PALETTE = {
+    "red": "#cc1f1f",
+    "dark_red": "#a81818",
+    "amber": "#e08a1e",
+    "green": "#2f9e63",
+    "page_bg": "#f1f1f1",
+    "card_bg": "#ffffff",
+    "card_border": "#e6e6e6",
+    "subtle_border": "#f1f1f1",
+    "thead_bg": "#fafafa",
+    "ink": "#1a1a1a",
+    "ink_soft": "#888888",
+    "ink_faint": "#aaaaaa",
+}
+FONT_MAIN = '"Noto Sans SC", system-ui, sans-serif'
+DEFAULT_MARGIN = dict(l=10, r=10, t=10, b=10)
+
+# --------------- HELPER ---------------
+def hex_to_rgba(hex_color: str, alpha: float) -> str:
+    hex_color = hex_color.lstrip("#")
+    r, g, b = (int(hex_color[i:i + 2], 16) for i in (0, 2, 4))
+    return f"rgba({r}, {g}, {b}, {alpha})"
+
+
+# --------------- CSS (root vars generated from PALETTE, rest is static) ---------------
+_ROOT_VARS = "\n".join(f"    --{k.replace('_', '-')}: {v};" for k, v in PALETTE.items())
+_ROOT_VARS += f"\n    --font-main: {FONT_MAIN};"
+
+_PILL_OK_BG = hex_to_rgba(PALETTE["green"], 0.12)
+_PILL_WARN_BG = hex_to_rgba(PALETTE["amber"], 0.14)
+_PILL_FAIL_BG = hex_to_rgba(PALETTE["red"], 0.12)
+
 CSS = """
 <style>
 :root {
-    --red: #cc1f1f;
-    --dark-red: #a81818;
-    --amber: #e08a1e;
-    --green: #2f9e63;
-    --page-bg: #f1f1f1;
-    --card-bg: #ffffff;
-    --card-border: #e6e6e6;
-    --subtle-border: #f1f1f1;
-    --thead-bg: #fafafa;
-    --ink: #1a1a1a;
-    --ink-soft: #888888;
-    --ink-faint: #aaaaaa;
-    --font-main: "Noto Sans SC", system-ui, sans-serif;
+""" + _ROOT_VARS + """
 }
 
 html, body, [class*="css"] {
@@ -107,9 +128,9 @@ div[data-testid="stVerticalBlockBorderWrapper"]:has(> div > div[data-testid="stV
     border-radius: 999px;
     white-space: nowrap;
 }
-.ri-pill-ok { background-color: rgba(47, 158, 99, 0.12); color: var(--green); }
-.ri-pill-warn { background-color: rgba(224, 138, 30, 0.14); color: var(--amber); }
-.ri-pill-fail { background-color: rgba(204, 31, 31, 0.12); color: var(--red); }
+.ri-pill-ok { background-color: __PILL_OK_BG__; color: var(--green); }
+.ri-pill-warn { background-color: __PILL_WARN_BG__; color: var(--amber); }
+.ri-pill-fail { background-color: __PILL_FAIL_BG__; color: var(--red); }
 .ri-pill-neutral { background-color: var(--thead-bg); color: var(--ink-soft); }
 
 /* ---------- Dataframe tweaks ---------- */
@@ -200,6 +221,11 @@ div[data-testid="stVerticalBlockBorderWrapper"]:has(> div > div[data-testid="stV
 
 </style>
 """
+CSS = (CSS
+    .replace("__PILL_OK_BG__", _PILL_OK_BG)
+    .replace("__PILL_WARN_BG__", _PILL_WARN_BG)
+    .replace("__PILL_FAIL_BG__", _PILL_FAIL_BG)
+)
 
 
 def inject(st_module) -> None:

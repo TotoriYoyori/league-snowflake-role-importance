@@ -29,9 +29,8 @@ class Settings(BaseModel):
     cv_n_repeats_default: int = Field(default=5, ge=1)
     cv_n_repeats_range: tuple[int, int] = (1, 10)
 
-    # ----- AUC threshold for the Model Evaluation tab's pill.
-    auc_ok_threshold: float = Field(default=0.80, gt=0.5, le=1.0)
-    auc_warn_threshold: float = Field(default=0.65, gt=0.5, le=1.0)
+    # ----- Classification decision rule (win vs. loss cutoff on predicted probability)
+    win_loss_threshold: float = Field(default=0.5, gt=0.0, lt=1.0)
 
     # ----- Labeling
     raw_lane_names: tuple[str, ...] = ("Top", "Jungle", "Middle", "Bottom", "Support")

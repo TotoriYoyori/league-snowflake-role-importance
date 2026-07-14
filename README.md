@@ -21,8 +21,9 @@ also powers a live predictor: type in 5 gold diffs, get a win probability back.
 - `src/model/` — plain pandas/sklearn/statsmodels functions with no Streamlit or Snowflake dependency:
   pivoting, scaling, train/test split, the model fits, CV coefficient stability, and the odds-ratio
   transform. Pure functions, easy to test in isolation.
-- `src/ui.py` — renders the 4 tabs; cards take a render callback rather than a bare dataframe, since most
-  of this app's output is a Plotly chart, not a table.
+- `src/ui/` — renders the 4 tabs, one module per tab plus a shared `components.py` (header/card/pill
+  chrome) and `theme.py` (color palette + CSS). Cards take a render callback rather than a bare
+  dataframe, since most of this app's output is a Plotly chart, not a table.
 - `settings.py` — one frozen pydantic `Settings` tree (Snowflake identifiers, cache TTLs, model
   hyperparameters, UI copy), built once at import. Validated fields (e.g. `n_splits > 1`) matter
   here because several of them are user-adjustable from the sidebar.
@@ -39,8 +40,8 @@ LeagueSnowflakeRoleImportance/
 │   ├── data.py          # all data procurement: cached pipeline stages, mock-or-live handling,
 │   │                     #   local-mode CSV join (mirrors query.py's logic in pandas), error handling
 │   ├── model/           # pure prep/eda/evaluation/importance/predictor functions
-│   ├── ui.py             # renders
-│   └── theme.py          # inject CSS
+│   └── ui/               # renders: theme (palette + CSS), components (shared chrome),
+│                          #   one module per tab (eda/evaluation/importance/predictor)
 ├── assets/
 │   └── sample_data/     # 1,000-match CSV sample, used whenever running locally
 └── snowflake.yml         # deploy on Snowflake

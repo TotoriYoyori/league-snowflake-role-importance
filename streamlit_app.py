@@ -1,7 +1,8 @@
 import streamlit as st
 
 from settings import settings
-from src import data, theme, ui
+from src import data, ui
+from src.ui import theme
 
 
 # --------------- CONSTANTS ---------------
