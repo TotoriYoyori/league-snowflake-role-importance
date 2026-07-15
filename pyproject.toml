@@ -1,7 +1,7 @@
 [project]
 name = "role-importance"
 version = "0.1.0"
-description = "Logistic regression model tracking per-lane gold-diff win coefficients across League of Legends patches (lane quest system impact)."
+description = "Logistic regression model tracking per-lane gold-diff win coefficients across League of Legends patches."
 requires-python = "~=3.11.0"
 dependencies = [
     "streamlit[snowflake]",

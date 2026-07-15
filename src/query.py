@@ -2,6 +2,7 @@ from pydantic import BaseModel, ConfigDict, field_validator
 
 from settings import settings
 
+
 # --------------- QUERY DIRECTLY FROM SNOWFLAKE DATABASE ---------------
 class DiffIntervalByMatch(BaseModel):
     model_config = ConfigDict(frozen=True)

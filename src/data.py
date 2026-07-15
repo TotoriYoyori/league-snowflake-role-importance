@@ -1,5 +1,3 @@
-import os
-
 import pandas as pd
 import streamlit as st
 
@@ -10,16 +8,20 @@ from src.model import (
     evaluation,
     importance,
     prep,
-    predict_win_probability,
     predictor_slider_bounds
 )
 
 
 # --------------- CONSTANTS ---------------
 # SiS session token file only exists inside Snowflake -> use Snowflake live data.
-IS_LOCAL: bool = not os.path.isfile("/snowflake/session/token")
-CACHE_TTL = 600
+IS_LOCAL: bool
+try:
+    conn = st.connection("snowflake")
+    IS_LOCAL = False
+except:
+    IS_LOCAL = True
 
+CACHE_TTL = 600
 
 # --------------- BASE ---------------
 def _failed(message: str) -> pd.DataFrame:
@@ -38,7 +40,10 @@ def get_session():
         return None
 
     conn = st.connection("snowflake", ttl=None)
-    return conn.session()
+    session = conn.session()
+    session.use_warehouse("COMPUTE_WH")
+
+    return session
 
 
 def _run(session, sql: str) -> pd.DataFrame:

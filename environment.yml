@@ -1,0 +1,12 @@
+name: role-importance
+channels:
+  - snowflake
+dependencies:
+  - streamlit
+  - snowflake-snowpark-python
+  - pydantic
+  - pandas
+  - numpy
+  - scikit-learn
+  - statsmodels
+  - plotly
