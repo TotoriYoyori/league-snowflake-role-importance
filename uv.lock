@@ -8,10 +8,7 @@ resolution-markers = [
 ]
 
 [options]
-exclude-newer = "2026-07-15T22:00:00Z"
-
-[options.exclude-newer-package]
-streamlit = false
+exclude-newer = "2026-07-01T00:00:00Z"
 
 [manifest]
 constraints = [{ name = "numba", specifier = ">=0.56.0" }]
