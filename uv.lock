@@ -8,8 +8,7 @@ resolution-markers = [
 ]
 
 [options]
-exclude-newer = "0001-01-01T00:00:00Z"
-exclude-newer-span = "P7D"
+exclude-newer = "2026-07-15T22:00:00Z"
 
 [options.exclude-newer-package]
 streamlit = false
