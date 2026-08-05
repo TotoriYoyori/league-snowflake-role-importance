@@ -69,9 +69,14 @@ def get_pivoted_data(settings: Settings, minute, team, min_game_duration):
     error = load_error(raw_df)
     if error is not None:
         return _failed(error), 0
-    pivoted_df, n_dropped = prep.pivot_diff_interval(raw_df, win_reference_team=team)
-    scaled_df = prep.scale_gold_diff(pivoted_df, list(settings.feature_cols), scale=settings.gold_scale)
-    return scaled_df, n_dropped
+    try:
+        pivoted_df, n_dropped = prep.pivot_diff_interval(raw_df, win_reference_team=team)
+        if pivoted_df.empty:
+            return _failed("No matches found for the selected filters."), n_dropped
+        scaled_df = prep.scale_gold_diff(pivoted_df, list(settings.feature_cols), scale=settings.gold_scale)
+        return scaled_df, n_dropped
+    except Exception as e:
+        return _failed(str(e)), 0
 
 
 @st.cache_data(ttl=CACHE_TTL)
