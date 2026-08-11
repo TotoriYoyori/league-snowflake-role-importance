@@ -24,16 +24,16 @@ class DiffIntervalByMatch(BaseModel):
         return f"""
             SELECT
                 D.MATCH_ID,
-                D.LANE,
+                D.CHAMPION_ROLE,
                 D.GOLD_DIFF,
                 M.WINNING_TEAM,
                 M.AVERAGE_RANK,
                 M.GAME_DATE,
                 M.GAME_DURATION
-            FROM LEAGUE_RECORDS.GOLD.DIFF_INTERVAL_STATE AS D
-            JOIN LEAGUE_RECORDS.GOLD.MATCH_TEAM_STATS_SUMMARY AS M
+            FROM LEAGUE_RECORDS.GOLD.DIFF_INTERVALS AS D
+            JOIN LEAGUE_RECORDS.GOLD.MATCHEND_PIVOT_TEAMSTATS AS M
                 ON D.MATCH_ID = M.MATCH_ID
             WHERE D.MINUTE = {self.minute}
-              AND D.TEAM = '{self.team}'
+              AND D.TEAM = '{self.team.upper()}'
               AND M.GAME_DURATION >= {self.min_game_duration}
         """

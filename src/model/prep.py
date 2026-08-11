@@ -2,14 +2,16 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 
 # --------------- NAMING CONSTANTS ---------------
-LANE_RENAME = {
-    "Top": "GOLD_DIFF_TOP",
-    "Jungle": "GOLD_DIFF_JUNGLE",
-    "Middle": "GOLD_DIFF_MIDDLE",
-    "Bottom": "GOLD_DIFF_BOTTOM",
-    "Support": "GOLD_DIFF_SUPPORT",
+# Keys are uppercase to match SILVER.PLAYERS' cleaning view (UPPER(ROLE)), which is what
+# GOLD.DIFF_INTERVALS.CHAMPION_ROLE actually stores (e.g. "TOP", not "Top").
+CHAMPION_ROLE_RENAME = {
+    "TOP": "GOLD_DIFF_TOP",
+    "JUNGLE": "GOLD_DIFF_JUNGLE",
+    "MIDDLE": "GOLD_DIFF_MIDDLE",
+    "BOTTOM": "GOLD_DIFF_BOTTOM",
+    "SUPPORT": "GOLD_DIFF_SUPPORT",
 }
-FEATURE_COLS = list(LANE_RENAME.values())
+FEATURE_COLS = list(CHAMPION_ROLE_RENAME.values())
 
 
 # --------------- PIVOT LONG -> WIDE ---------------
@@ -23,12 +25,12 @@ def pivot_diff_interval(
     pivoted_df = (df
         .pivot_table(
             index=["MATCH_ID", "WINNING_TEAM", "AVERAGE_RANK", "GAME_DATE", "GAME_DURATION"],
-            columns="LANE",
+            columns="CHAMPION_ROLE",
             values="GOLD_DIFF",
         )
         .reset_index()
-        .rename(columns=LANE_RENAME)
-        .assign(**{win_col: lambda d: (d["WINNING_TEAM"] == win_reference_team).astype(int)})
+        .rename(columns=CHAMPION_ROLE_RENAME)
+        .assign(**{win_col: lambda d: (d["WINNING_TEAM"] == win_reference_team.upper()).astype(int)})
     )
     before = len(pivoted_df)
 
