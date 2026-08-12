@@ -1,12 +1,15 @@
 # Role Importance
 
-> **Live demo:** [league-sf-role-importance.streamlit.app](https://league-sf-role-importance.streamlit.app/) 
+### Play with the live demo here: [league-sf-role-importance.streamlit.app](https://league-sf-role-importance.streamlit.app/) 
 
-> **Parent pipeline:** [github.com/TotoriYoyori/league-snowflake](https://github.com/TotoriYoyori/league-snowflake)
+### Or visit the parent pipeline: [github.com/TotoriYoyori/league-snowflake](https://github.com/TotoriYoyori/league-snowflake)
 
 A simple logistic regression Streamlit app. Observe how each lane's gold diff at a chosen match minute affect the total 
-win probability for your LoL match. **Can run as a demo using sample data, or be connected to the parent pipeline
-and use live, continuous data.**
+win probability for your LoL match. 
+> *Snowflake version is deployed as a warehouse-runtime app, capable of using live, continuous data from the 
+pipeline. Demo versions uses a small subset of sample data, hosted on Streamlit Cloud.*
+
+![Dual deployment on Streamlit Cloud and Snowflake](assets/img/st_role_01_dual_version.png)
 
 ----
 ## Project structure
@@ -14,7 +17,7 @@ and use live, continuous data.**
 ```
 LeagueSnowflakeRoleImportance/
 ├── streamlit_app.py     # entry point
-├── settings.py          # validated config
+├── settings.py          # config
 ├── src/
 │   ├── query.py         # live Snowflake query
 │   ├── data.py          # all data procurement for ui display, and caching
@@ -25,15 +28,23 @@ LeagueSnowflakeRoleImportance/
 │   └── sample_data/     # CSV sample, used whenever running locally
 ```
 ----
-## What can it answer?
+## Gallery
 
-| Question                                                               | Answered by |
-|------------------------------------------------------------------------|-------------|
-| Which lane's gold lead most decides the game right now?                | **Lane Importance** tab |
-| Did last patch's nerf actually reduce a lane's impact?                 | **Lane Importance** tab |
-| Is the model even any good at minute *X*?                              | **Model Evaluation** tab |
-| We're up 500g mid, down 2000g top at minute 20, what's our win chance? | **Predictor** tab |
-| What does the underlying data actually look like?                      | **EDA** tab |
+![Gold diff coefficient per lane, bar plot](assets/img/st_role_02_lane_importance.png)
+
+> *Which lane's gold lead most decides the game right now? (Lane Importance tab)*
+
+![Win predictor](assets/img/st_role_03_win_predictor.png)
+
+> *At 15 minutes, our top and mid is losing, but our bottom lane is winning. What is our win probability? (Predictor tab)*
+
+![Model evaluation](assets/img/st_role_04_model_eval.png)
+
+> *Is the model even any good at minute 15? (Model Evaluation tab)*
+
+![Explore the data](assets/img/st_role_05_eda.png)
+
+> *What does the underlying data look like? (EDA tab)*
 
 Model, in short:
 
@@ -52,5 +63,10 @@ The Model Evaluation tab's pill flags when to trust a given minute's coefficient
   app on each patch's data and comparing manually (future additions)
 - One fixed 70/30 train/test split for the Model Evaluation tab, not repeated or cross-validated (Lane
   Importance's CV stability check is separate and only covers the full-data fit).
+- Not yet capping live version amount of data used. The live version will in theory use all available data.
 
 > Original source: [LoL Match Intervals: 2 Million In-Game Snapshots](https://www.kaggle.com/datasets/nathansmallcalder/league-of-legends-match-interval-snapshots-2026)
+
+----
+**Stacks used:** Python | SQL | NumPy | Pandas | Scikit-Learn | Statsmodels | 
+Plotly | Pydantic | Streamlit | Snowflake
